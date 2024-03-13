@@ -133,9 +133,10 @@ void pair_optiga(void) {
   // it is OK for some of the intermediate operations to fail.
 
   uint8_t secret[SECRET_OPTIGA_KEY_LEN] = {0};
+  uint8_t secret_dec[SECRET_OPTIGA_KEY_LEN] = {0};
   optiga_result ret = OPTIGA_SUCCESS;
 
-  if (secret_optiga_extract(secret) != sectrue) {
+  if (secret_optiga_extract(secret_dec) != sectrue) {
     // Enable writing the pairing secret to OPTIGA.
     optiga_metadata metadata = {0};
     metadata.change = OPTIGA_META_ACCESS_ALWAYS;
@@ -174,15 +175,14 @@ void pair_optiga(void) {
       optiga_pairing_state = OPTIGA_PAIRING_ERR_READ;
       return;
     }
-  }
 
-  uint8_t secret_dec[SECRET_OPTIGA_KEY_LEN] = {0};
 #ifdef STM32U5
-  secure_aes_ecb_decrypt_hw(secret, sizeof(secret), secret_dec,
-                            SECURE_AES_KEY_DHUK);
+    secure_aes_ecb_decrypt_hw(secret, sizeof(secret), secret_dec,
+                              SECURE_AES_KEY_DHUK);
 #else
-  memcpy(secret_dec, secret, sizeof(secret_dec));
+    memcpy(secret_dec, secret, sizeof(secret_dec));
 #endif
+  }
 
   ret = optiga_sec_chan_handshake(secret_dec, sizeof(secret_dec));
   memzero(secret, sizeof(secret));
