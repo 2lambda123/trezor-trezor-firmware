@@ -18,7 +18,9 @@
  */
 
 #include "flash_area.h"
+#include <stdbool.h>
 #include <stddef.h>
+#include <string.h>
 
 uint32_t flash_area_get_size(const flash_area_t *area) {
   uint32_t size = 0;
@@ -120,6 +122,7 @@ secbool flash_area_write_quadword(const flash_area_t *area, uint32_t offset,
 
 #endif  // not defined FLASH_BIT_ACCESS
 
+#ifdef FLASH_BURST_SIZE
 secbool flash_area_write_burst(const flash_area_t *area, uint32_t offset,
                                const uint32_t *data) {
   uint16_t sector;
@@ -129,6 +132,7 @@ secbool flash_area_write_burst(const flash_area_t *area, uint32_t offset,
   }
   return flash_write_burst(sector, sector_offset, data);
 }
+#endif
 
 secbool flash_area_write_block(const flash_area_t *area, uint32_t offset,
                                const flash_block_t block) {
@@ -143,6 +147,119 @@ secbool flash_area_write_block(const flash_area_t *area, uint32_t offset,
   }
 
   return flash_write_block(sector, sector_offset, block);
+}
+
+static bool flash_burst_aligned(uint32_t offset) {
+#ifdef FLASH_BURST_SIZE
+  return (offset % FLASH_BURST_SIZE) == 0;
+#else
+  (void)offset;
+  return false;
+#endif
+}
+
+secbool __wur flash_area_write_data(const flash_area_t *area, uint32_t offset,
+                                    const void *data, uint32_t size) {
+  return flash_area_write_data_padded(area, offset, data, size, 0, size);
+}
+
+secbool __wur flash_area_write_data_padded(const flash_area_t *area,
+                                           uint32_t offset, const void *data,
+                                           uint32_t data_size, uint8_t padding,
+                                           uint32_t total_size) {
+  if (offset % FLASH_BLOCK_SIZE) {
+    return secfalse;
+  }
+  if (total_size % FLASH_BLOCK_SIZE) {
+    return secfalse;
+  }
+  if (data_size > total_size) {
+    return secfalse;
+  }
+  if (total_size > flash_area_get_size(area)) {
+    return secfalse;
+  }
+
+  const uint32_t *data32 = (const uint32_t *)data;
+
+  while (!flash_burst_aligned(offset) && data_size >= FLASH_BLOCK_SIZE) {
+    if (flash_area_write_block(area, offset, data32) != sectrue) {
+      return secfalse;
+    }
+    offset += FLASH_BLOCK_SIZE;
+    data32 += FLASH_BLOCK_WORDS;
+    total_size -= FLASH_BLOCK_SIZE;
+    data_size -= FLASH_BLOCK_SIZE;
+  }
+
+#ifdef FLASH_BURST_SIZE
+  while (data_size >= FLASH_BURST_SIZE) {
+    if (flash_area_write_burst(area, offset, data32) != sectrue) {
+      return secfalse;
+    }
+    offset += FLASH_BURST_SIZE;
+    data32 += FLASH_BURST_WORDS;
+    total_size -= FLASH_BURST_SIZE;
+    data_size -= FLASH_BURST_SIZE;
+  }
+#endif
+
+  while (!flash_burst_aligned(offset) && total_size >= FLASH_BLOCK_SIZE) {
+    uint32_t data_qw[FLASH_BLOCK_WORDS];
+    memset(data_qw, padding, FLASH_BLOCK_SIZE);
+
+    if (data_size > 0) {
+      uint32_t to_copy =
+          data_size > FLASH_BLOCK_SIZE ? FLASH_BLOCK_SIZE : data_size;
+      memcpy(data_qw, data32, to_copy);
+      data_size -= to_copy;
+    }
+
+    if (flash_area_write_block(area, offset, data_qw) != sectrue) {
+      return secfalse;
+    }
+    offset += FLASH_BLOCK_SIZE;
+    data32 += FLASH_BLOCK_WORDS;
+    total_size -= FLASH_BLOCK_SIZE;
+  }
+
+#ifdef FLASH_BURST_SIZE
+  while (total_size >= FLASH_BURST_SIZE) {
+    uint32_t data_burst[FLASH_BURST_WORDS];
+    memset(data_burst, padding, FLASH_BURST_SIZE);
+
+    if (data_size > 0) {
+      memcpy(data_burst, data32, data_size);
+      data_size = 0;
+    }
+
+    if (flash_area_write_burst(area, offset, data_burst) != sectrue) {
+      return secfalse;
+    }
+    offset += FLASH_BURST_SIZE;
+    total_size -= FLASH_BURST_SIZE;
+  }
+#endif
+
+  while (total_size >= FLASH_BLOCK_SIZE) {
+    uint32_t data_qw[FLASH_BLOCK_WORDS];
+    memset(data_qw, padding, FLASH_BLOCK_SIZE);
+
+    if (data_size > 0) {
+      uint32_t to_copy =
+          data_size > FLASH_BLOCK_SIZE ? FLASH_BLOCK_SIZE : data_size;
+      memcpy(data_qw, data32, to_copy);
+      data_size -= to_copy;
+    }
+
+    if (flash_area_write_block(area, offset, data_qw) != sectrue) {
+      return secfalse;
+    }
+    offset += FLASH_BLOCK_SIZE;
+    data32 += FLASH_BLOCK_WORDS;
+    total_size -= FLASH_BLOCK_SIZE;
+  }
+  return sectrue;
 }
 
 secbool flash_area_erase(const flash_area_t *area,
