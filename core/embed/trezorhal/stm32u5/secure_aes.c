@@ -109,6 +109,8 @@ secbool secure_aes_ecb_encrypt_hw(const uint8_t* input, size_t size,
       memcpy(input_buffer, input, AES_BLOCK_SIZE);
       if (HAL_CRYP_Encrypt(&hcryp, input_buffer, AES_BLOCK_SIZE, output_buffer,
                            HAL_MAX_DELAY) != HAL_OK) {
+        memzero(input_buffer, sizeof(input_buffer));
+        memzero(output_buffer, sizeof(output_buffer));
         return secfalse;
       }
       memcpy(output, output_buffer, AES_BLOCK_SIZE);
@@ -173,6 +175,8 @@ secbool secure_aes_ecb_decrypt_hw(const uint8_t* input, size_t size,
       memcpy(input_buffer, input, AES_BLOCK_SIZE);
       if (HAL_CRYP_Decrypt(&hcryp, input_buffer, AES_BLOCK_SIZE, output_buffer,
                            HAL_MAX_DELAY) != HAL_OK) {
+        memzero(input_buffer, sizeof(input_buffer));
+        memzero(output_buffer, sizeof(output_buffer));
         return secfalse;
       }
       memcpy(output, output_buffer, AES_BLOCK_SIZE);
