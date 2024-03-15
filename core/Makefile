@@ -211,11 +211,15 @@ clippy:
 
 ## code generation:
 
-templates: ## render Mako templates (for lists of coins, tokens, etc.)
+templates: translations  ## render Mako templates (for lists of coins, tokens, etc.)
 	./tools/build_templates
 
 templates_check: ## check that Mako-rendered files match their templates
 	./tools/build_templates --check
+
+translations: ## update translations
+	python ./translations/order.py
+	python ./translations/cli.py gen
 
 solana_templates: ## rebuild Solana instruction template file
 	./tools/build_solana_templates
@@ -455,3 +459,5 @@ coverage:  ## generate coverage report
 unused:  ## find unused micropython code
 	vulture src src/_vulture_ignore.txt --exclude "messages.py,*/enums/*"
 
+
+.PHONY: templates translations
