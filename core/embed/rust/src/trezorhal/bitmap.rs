@@ -211,6 +211,17 @@ impl<'a> Bitmap<'a> {
         }
     }
 
+    /// Waits until DMA operation is finished
+    fn wait_for_dma(&self) {
+        if self.dma_pending.get() {
+            #[cfg(feature = "dma2d")]
+            unsafe {
+                ffi::dma2d_wait_for_transfer();
+            }
+            self.dma_pending.set(false);
+        }
+    }
+
     /// Fills a rectangle with the specified color.
     ///
     /// The function is aplicable only on bitmaps with RGB565 format.
@@ -365,17 +376,6 @@ impl<'a> Bitmap<'a> {
             src.bitmap.dma_pending.set(true);
         }
     }
-
-    /// Waits until DMA operation is finished
-    fn wait_for_dma(&self) {
-        if self.dma_pending.get() {
-            #[cfg(feature = "dma2d")]
-            unsafe {
-                ffi::dma2d_wait_for_transfer();
-            }
-            self.dma_pending.set(false);
-        }
-    }
 }
 
 impl<'a> Drop for Bitmap<'a> {
@@ -456,6 +456,26 @@ impl<'a> BitmapView<'a> {
 
 pub type Dma2d = ffi::dma2d_params_t;
 
+impl Default for Dma2d {
+    fn default() -> Self {
+        Self {
+            width: 0,
+            height: 0,
+            dst_row: core::ptr::null_mut(),
+            dst_stride: 0,
+            dst_x: 0,
+            dst_y: 0,
+            src_row: core::ptr::null_mut(),
+            src_bg: 0,
+            src_fg: 0,
+            src_stride: 0,
+            src_x: 0,
+            src_y: 0,
+            src_alpha: 255,
+        }
+    }
+}
+
 impl Dma2d {
     pub fn new_fill(r: Rect, clip: Rect, color: Color, alpha: u8) -> Option<Self> {
         let r = r.intersect(clip);
@@ -520,24 +540,6 @@ impl Dma2d {
             dst_row: unsafe { dst.ptr.add(dst.stride * self.dst_y as usize) as *mut cty::c_void },
             dst_stride: dst.stride as u16,
             ..self
-        }
-    }
-
-    fn default() -> Self {
-        Self {
-            width: 0,
-            height: 0,
-            dst_row: core::ptr::null_mut(),
-            dst_stride: 0,
-            dst_x: 0,
-            dst_y: 0,
-            src_row: core::ptr::null_mut(),
-            src_bg: 0,
-            src_fg: 0,
-            src_stride: 0,
-            src_x: 0,
-            src_y: 0,
-            src_alpha: 255,
         }
     }
 

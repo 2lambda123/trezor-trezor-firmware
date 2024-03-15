@@ -41,8 +41,7 @@ bool rgb565_fill(const dma2d_params_t* dp) {
         }
         dst_ptr += dp->dst_stride / sizeof(*dst_ptr);
       }
-    }
-    else {
+    } else {
       uint8_t alpha = dp->src_alpha;
       while (height-- > 0) {
         for (int x = 0; x < dp->width; x++) {

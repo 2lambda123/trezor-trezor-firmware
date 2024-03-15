@@ -237,7 +237,6 @@ static inline gdc_color16_t gdc_color16_blend_a8(gdc_color32_t fg,
   return gdc_color16_rgb(r, g, b)
 }
 
-
 // Blends foreground and background colors with 4-bit alpha
 //
 // Returns a color in 32-bit format
