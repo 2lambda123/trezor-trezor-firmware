@@ -27,7 +27,6 @@ Issue Date: 02/08/2018
 #include <stdlib.h>
 #include <stdint.h>
 
-#define VOID_RETURN         void
 #define INT_RETURN          int
 #define ALIGN_OFFSET(x,n)   (((intptr_t)(x)) & ((n) - 1))
 #define ALIGN_FLOOR(x,n)    ((uint8_t*)(x) - ( ((intptr_t)(x)) & ((n) - 1)))
@@ -131,9 +130,7 @@ AES_RETURN aes_encrypt_key192(const unsigned char *key, aes_encrypt_ctx cx[1]);
 AES_RETURN aes_encrypt_key256(const unsigned char *key, aes_encrypt_ctx cx[1]);
 #endif
 
-#if defined( AES_VAR )
 AES_RETURN aes_encrypt_key(const unsigned char *key, int key_len, aes_encrypt_ctx cx[1]);
-#endif
 
 AES_RETURN aes_encrypt(const unsigned char *in, unsigned char *out, const aes_encrypt_ctx cx[1]);
 
