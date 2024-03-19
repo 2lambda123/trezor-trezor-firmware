@@ -483,7 +483,6 @@ static void derive_kek(const uint8_t *pin, size_t pin_len,
   uint8_t salt[HARDWARE_SALT_SIZE + STORAGE_SALT_SIZE + EXTERNAL_SALT_SIZE] = {
       0};
   size_t salt_len = 0;
-  uint8_t kek_out[SHA256_DIGEST_LENGTH] = {0};
 
   memcpy(salt + salt_len, hardware_salt, HARDWARE_SALT_SIZE);
   salt_len += HARDWARE_SALT_SIZE;
