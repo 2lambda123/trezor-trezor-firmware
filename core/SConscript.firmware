@@ -739,7 +739,7 @@ def cargo_build():
     if PYOPT == '0':
         features.append('debug')
         features.append('ui_debug')
-    if TREZOR_MODEL in ('T',):
+    if TREZOR_MODEL in ('T', 'T3T1'):
         features.append('ui_antialiasing')
         features.append('ui_blurring')
         features.append('ui_jpeg_decoder')

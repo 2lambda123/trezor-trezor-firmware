@@ -13,11 +13,11 @@ pub use ffi::{
 
 #[cfg(all(feature = "framebuffer", not(feature = "framebuffer32bit")))]
 #[derive(Copy, Clone)]
-pub struct FrameBuffer(*mut u16);
+pub struct FrameBuffer(pub *mut u16);
 
 #[cfg(all(feature = "framebuffer", feature = "framebuffer32bit"))]
 #[derive(Copy, Clone)]
-pub struct FrameBuffer(*mut u32);
+pub struct FrameBuffer(pub *mut u32);
 
 pub fn backlight(val: i32) -> i32 {
     unsafe { ffi::display_backlight(val) }
