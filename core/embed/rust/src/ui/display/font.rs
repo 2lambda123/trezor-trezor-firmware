@@ -178,7 +178,12 @@ impl Font {
         self.text_width(text) - first_char_bearing - last_char_bearing
     }
 
-    pub fn visible_text_height(&self, text: &str) -> i16 {
+    /// Calculates the height of visible text.
+    ///
+    /// It determines this height by finding the highest
+    /// pixel above the baseline and the lowest pixel below the baseline among
+    /// the glyphs representing the characters in the provided text.
+    pub fn visible_text_height(self, text: &str) -> i16 {
         let (mut ascent, mut descent) = (0, 0);
         for c in text.chars() {
             let glyph = self.get_glyph(c);
@@ -186,6 +191,15 @@ impl Font {
             descent = descent.max(glyph.height - glyph.bearing_y);
         }
         ascent + descent
+    }
+
+    /// Calculates the height of text containing both uppercase
+    /// and lowercase characters.
+    ///
+    /// This function computes the height of a string containing both
+    /// uppercase and lowercase characters of the given font.
+    pub fn allcase_text_height(self) -> i16 {
+        self.visible_text_height("Ay")
     }
 
     /// Returning the x-bearing (offset) of the first character.
