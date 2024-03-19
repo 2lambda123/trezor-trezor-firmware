@@ -24,7 +24,7 @@ where
         bump_b.reset();
 
         let fb_addr = crate::trezorhal::display::get_fb_addr().0 as *mut u8;
-        let fb = unsafe { core::slice::from_raw_parts_mut(fb_addr, 240 * 240 * 2)};
+        let fb = unsafe { core::slice::from_raw_parts_mut(fb_addr, 240 * 240 * 2) };
 
         let cache = DrawingCache::new(bump_a, bump_b);
         let mut canvas = unwrap!(Rgb565Canvas::new(Offset::new(240, 240), None, fb));
@@ -40,4 +40,3 @@ where
         display::refresh();
     }
 }
-
