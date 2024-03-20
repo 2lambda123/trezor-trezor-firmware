@@ -431,7 +431,7 @@ int bootloader_main(void) {
   touch_power_on();
 #ifdef TREZOR_MODEL_T3T1
   // on T3T1, tester needs to run without touch, so making an exception
-  // util unit variant is written in OTP
+  // until unit variant is written in OTP
   if (unit_variant_present()) {
     ensure(touch_init(), "Touch screen panel was not loaded properly.");
   } else {
