@@ -47,13 +47,15 @@ class TestCryptoAes(unittest.TestCase):
         for vector in self.vectors:
             key, iv, pt, aad, ct, tag = map(unhexlify, vector)
 
+            # Test encryption.
             ctx = aesgcm(key, iv)
             if aad:
                 ctx.auth(aad)
             self.assertEqual(ctx.encrypt(pt), ct)
             self.assertEqual(ctx.finish(), tag)
 
-            ctx = aesgcm(key, iv)
+            # Test decryption.
+            ctx.reset(iv)
             if aad:
                 ctx.auth(aad)
             self.assertEqual(ctx.decrypt(ct), pt)
@@ -65,16 +67,20 @@ class TestCryptoAes(unittest.TestCase):
 
             chunk1 = len(pt) // 3
 
+            # Decrypt by chunks and add authenticated data by chunks.
             ctx = aesgcm(key, iv)
-            ctx.auth(aad)
-            self.assertEqual(ctx.encrypt(pt[:chunk1]), ct[:chunk1])
-            self.assertEqual(ctx.encrypt(pt[chunk1:]), ct[chunk1:])
+            self.assertEqual(ctx.decrypt(ct[:chunk1]), pt[:chunk1])
+            ctx.auth(aad[:17])
+            self.assertEqual(ctx.decrypt(ct[chunk1:]), pt[chunk1:])
+            ctx.auth(aad[17:])
             self.assertEqual(ctx.finish(), tag)
 
-            ctx = aesgcm(key, iv)
-            ctx.auth(aad)
-            self.assertEqual(ctx.decrypt(ct[:chunk1]), pt[:chunk1])
-            self.assertEqual(ctx.decrypt(ct[chunk1:]), pt[chunk1:])
+            # Encrypt by chunks and add authenticated data by chunks.
+            ctx.reset(iv)
+            ctx.auth(aad[:7])
+            self.assertEqual(ctx.encrypt(pt[:chunk1]), ct[:chunk1])
+            ctx.auth(aad[7:])
+            self.assertEqual(ctx.encrypt(pt[chunk1:]), ct[chunk1:])
             self.assertEqual(ctx.finish(), tag)
 
 
