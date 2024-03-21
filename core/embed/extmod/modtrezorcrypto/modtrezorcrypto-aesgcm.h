@@ -31,6 +31,12 @@
 typedef struct _mp_obj_AesGcm_t {
   mp_obj_base_t base;
   gcm_ctx ctx;
+  enum {
+    STATE_INIT,
+    STATE_ENCRYPTING,
+    STATE_DECRYPTING,
+    STATE_FINISHED,
+  } state;
 } mp_obj_AesGcm_t;
 
 /// def __init__(self, key: bytes, iv: bytes) -> None:
@@ -43,6 +49,7 @@ STATIC mp_obj_t mod_trezorcrypto_AesGcm_make_new(const mp_obj_type_t *type,
   mp_arg_check_num(n_args, n_kw, 2, 2, false);
   mp_obj_AesGcm_t *o = m_new_obj_with_finaliser(mp_obj_AesGcm_t);
   o->base.type = type;
+  o->state = STATE_INIT;
   mp_buffer_info_t key = {0}, iv = {0};
   mp_get_buffer_raise(args[0], &key, MP_BUFFER_READ);
   mp_get_buffer_raise(args[1], &iv, MP_BUFFER_READ);
@@ -57,12 +64,33 @@ STATIC mp_obj_t mod_trezorcrypto_AesGcm_make_new(const mp_obj_type_t *type,
   return MP_OBJ_FROM_PTR(o);
 }
 
+/// def reset(self, iv: bytes) -> None:
+///     """
+///     Reset the IV for encryption or decryption.
+///     """
+STATIC mp_obj_t mod_trezorcrypto_AesGcm_reset(mp_obj_t self, mp_obj_t iv) {
+  mp_obj_AesGcm_t *o = MP_OBJ_TO_PTR(self);
+  mp_buffer_info_t in = {0};
+  mp_get_buffer_raise(iv, &in, MP_BUFFER_READ);
+  if (gcm_init_message(in.buf, in.len, &(o->ctx)) != RETURN_GOOD) {
+    mp_raise_type(&mp_type_RuntimeError);
+  }
+  o->state = STATE_INIT;
+  return MP_OBJ_FROM_PTR(o);
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorcrypto_AesGcm_reset_obj,
+                                 mod_trezorcrypto_AesGcm_reset);
+
 /// def encrypt(self, data: bytes) -> bytes:
 ///     """
 ///     Encrypt data chunk.
 ///     """
 STATIC mp_obj_t mod_trezorcrypto_AesGcm_encrypt(mp_obj_t self, mp_obj_t data) {
   mp_obj_AesGcm_t *o = MP_OBJ_TO_PTR(self);
+  if (o->state != STATE_INIT && o->state != STATE_ENCRYPTING) {
+    mp_raise_msg(&mp_type_RuntimeError, "Invalid state.");
+  }
+  o->state = STATE_ENCRYPTING;
   mp_buffer_info_t in = {0};
   mp_get_buffer_raise(data, &in, MP_BUFFER_READ);
   vstr_t vstr = {0};
@@ -83,6 +111,10 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorcrypto_AesGcm_encrypt_obj,
 ///     """
 STATIC mp_obj_t mod_trezorcrypto_AesGcm_decrypt(mp_obj_t self, mp_obj_t data) {
   mp_obj_AesGcm_t *o = MP_OBJ_TO_PTR(self);
+  if (o->state != STATE_INIT && o->state != STATE_DECRYPTING) {
+    mp_raise_msg(&mp_type_RuntimeError, "Invalid state.");
+  }
+  o->state = STATE_DECRYPTING;
   mp_buffer_info_t in = {0};
   mp_get_buffer_raise(data, &in, MP_BUFFER_READ);
   vstr_t vstr = {0};
@@ -99,11 +131,16 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorcrypto_AesGcm_decrypt_obj,
 
 /// def auth(self, data: bytes) -> None:
 ///     """
-///     Include authenticated data in the GCM authentication tag. This must
-///     only be called once and prior to encryption or decryption.
+///     Include authenticated data chunk in the GCM authentication tag. This can
+///     be called repeatedly to add authenticated data at any point before
+///     finish().
 ///     """
 STATIC mp_obj_t mod_trezorcrypto_AesGcm_auth(mp_obj_t self, mp_obj_t data) {
   mp_obj_AesGcm_t *o = MP_OBJ_TO_PTR(self);
+  if (o->state != STATE_INIT && o->state != STATE_ENCRYPTING &&
+      o->state != STATE_DECRYPTING) {
+    mp_raise_msg(&mp_type_RuntimeError, "Invalid state.");
+  }
   mp_buffer_info_t in = {0};
   mp_get_buffer_raise(data, &in, MP_BUFFER_READ);
   if (gcm_auth_header(in.buf, in.len, &(o->ctx)) != RETURN_GOOD) {
@@ -120,6 +157,11 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorcrypto_AesGcm_auth_obj,
 ///     """
 STATIC mp_obj_t mod_trezorcrypto_AesGcm_finish(mp_obj_t self) {
   mp_obj_AesGcm_t *o = MP_OBJ_TO_PTR(self);
+  if (o->state != STATE_INIT && o->state != STATE_ENCRYPTING &&
+      o->state != STATE_DECRYPTING) {
+    mp_raise_msg(&mp_type_RuntimeError, "Invalid state.");
+  }
+  o->state = STATE_FINISHED;
   vstr_t tag = {0};
   vstr_init_len(&tag, 16);
   if (gcm_compute_tag((unsigned char *)tag.buf, tag.len, &(o->ctx)) !=
@@ -140,6 +182,8 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_1(mod_trezorcrypto_AesGcm___del___obj,
                                  mod_trezorcrypto_AesGcm___del__);
 
 STATIC const mp_rom_map_elem_t mod_trezorcrypto_AesGcm_locals_dict_table[] = {
+    {MP_ROM_QSTR(MP_QSTR_reset),
+     MP_ROM_PTR(&mod_trezorcrypto_AesGcm_reset_obj)},
     {MP_ROM_QSTR(MP_QSTR_encrypt),
      MP_ROM_PTR(&mod_trezorcrypto_AesGcm_encrypt_obj)},
     {MP_ROM_QSTR(MP_QSTR_decrypt),

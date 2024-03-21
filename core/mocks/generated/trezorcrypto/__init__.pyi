@@ -44,6 +44,11 @@ class aesgcm:
         Initialize the AES-GCM context for encryption or decryption.
         """
 
+    def reset(self, iv: bytes) -> None:
+        """
+        Reset the IV for encryption or decryption.
+        """
+
     def encrypt(self, data: bytes) -> bytes:
         """
         Encrypt data chunk.
@@ -56,8 +61,9 @@ class aesgcm:
 
     def auth(self, data: bytes) -> None:
         """
-        Include authenticated data in the GCM authentication tag. This must
-        only be called once and prior to encryption or decryption.
+        Include authenticated data chunk in the GCM authentication tag. This can
+        be called repeatedly to add authenticated data at any point before
+        finish().
         """
 
     def finish(self) -> bytes:
