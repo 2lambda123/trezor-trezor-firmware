@@ -10,6 +10,7 @@ mod vertical_menu;
 #[rustfmt::skip]
 mod fido_icons;
 mod error;
+mod flow;
 mod frame;
 #[cfg(feature = "micropython")]
 mod homescreen;
@@ -37,6 +38,7 @@ pub use coinjoin_progress::CoinJoinProgress;
 pub use dialog::{Dialog, DialogMsg, IconDialog};
 pub use error::ErrorScreen;
 pub use fido::{FidoConfirm, FidoMsg};
+pub use flow::GetAddressFlow;
 pub use frame::{Frame, FrameMsg};
 #[cfg(feature = "micropython")]
 pub use homescreen::{check_homescreen_format, Homescreen, HomescreenMsg, Lockscreen};

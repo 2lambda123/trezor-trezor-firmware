@@ -8,6 +8,7 @@ use crate::ui::{
 
 use super::theme;
 
+#[derive(Copy, Clone)]
 pub enum SwipeDirection {
     Up,
     Down,
@@ -21,8 +22,7 @@ pub struct Swipe {
     pub allow_down: bool,
     pub allow_left: bool,
     pub allow_right: bool,
-    backlight_start: u16,
-    backlight_end: u16,
+
     origin: Option<Point>,
 }
 
@@ -37,8 +37,6 @@ impl Swipe {
             allow_down: false,
             allow_left: false,
             allow_right: false,
-            backlight_start: theme::BACKLIGHT_NORMAL,
-            backlight_end: theme::BACKLIGHT_NONE,
             origin: None,
         }
     }
@@ -78,13 +76,6 @@ impl Swipe {
     fn ratio(&self, dist: i16) -> f32 {
         (dist as f32 / Self::DISTANCE as f32).min(1.0)
     }
-
-    fn backlight(&self, ratio: f32) {
-        let start = self.backlight_start as f32;
-        let end = self.backlight_end as f32;
-        let value = start + ratio * (end - start);
-        display::set_backlight(value as u16);
-    }
 }
 
 impl Component for Swipe {
@@ -112,12 +103,12 @@ impl Component for Swipe {
                 if abs.x > abs.y && (self.allow_left || self.allow_right) {
                     // Horizontal direction.
                     if (ofs.x < 0 && self.allow_left) || (ofs.x > 0 && self.allow_right) {
-                        self.backlight(self.ratio(abs.x));
+                        // self.backlight(self.ratio(abs.x));
                     }
                 } else if abs.x < abs.y && (self.allow_up || self.allow_down) {
                     // Vertical direction.
                     if (ofs.y < 0 && self.allow_up) || (ofs.y > 0 && self.allow_down) {
-                        self.backlight(self.ratio(abs.y));
+                        // self.backlight(self.ratio(abs.y));
                     }
                 };
             }
@@ -150,7 +141,6 @@ impl Component for Swipe {
                 };
 
                 // Swipe did not happen, reset the backlight.
-                self.backlight(0.0);
             }
             _ => {
                 // Do nothing.

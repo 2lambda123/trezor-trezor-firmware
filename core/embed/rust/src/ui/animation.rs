@@ -59,4 +59,11 @@ impl<T> Animation<T> {
             panic!("offset is too large");
         }
     }
+
+    pub fn finished(&self, now: Instant) -> bool
+    where
+        T: Lerp + Eq,
+    {
+        self.value(now) == self.to
+    }
 }

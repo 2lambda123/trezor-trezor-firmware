@@ -49,11 +49,11 @@ use super::{
     component::{
         AddressDetails, Bip39Input, Button, ButtonMsg, ButtonPage, ButtonStyleSheet,
         CancelConfirmMsg, CancelInfoConfirmMsg, CoinJoinProgress, Dialog, DialogMsg, FidoConfirm,
-        FidoMsg, Frame, FrameMsg, Homescreen, HomescreenMsg, IconDialog, Lockscreen, MnemonicInput,
-        MnemonicKeyboard, MnemonicKeyboardMsg, NumberInputDialog, NumberInputDialogMsg,
-        PassphraseKeyboard, PassphraseKeyboardMsg, PinKeyboard, PinKeyboardMsg, Progress,
-        SelectWordCount, SelectWordCountMsg, SelectWordMsg, SimplePage, Slip39Input, VerticalMenu,
-        VerticalMenuChoiceMsg,
+        FidoMsg, Frame, FrameMsg, GetAddressFlow, Homescreen, HomescreenMsg, IconDialog,
+        Lockscreen, MnemonicInput, MnemonicKeyboard, MnemonicKeyboardMsg, NumberInputDialog,
+        NumberInputDialogMsg, PassphraseKeyboard, PassphraseKeyboardMsg, PinKeyboard,
+        PinKeyboardMsg, Progress, SelectWordCount, SelectWordCountMsg, SelectWordMsg, SimplePage,
+        Slip39Input, VerticalMenu, VerticalMenuChoiceMsg,
     },
     theme,
 };
@@ -388,6 +388,12 @@ where
     }
 }
 
+impl ComponentMsgObj for GetAddressFlow {
+    fn msg_try_into_obj(&self, msg: Self::Msg) -> Result<Obj, Error> {
+        msg.try_into()
+    }
+}
+
 extern "C" fn new_confirm_action(n_args: usize, args: *const Obj, kwargs: *mut Map) -> Obj {
     let block = move |_args: &[Obj], kwargs: &Map| {
         let title: StrBuffer = kwargs.get(Qstr::MP_QSTR_title)?.try_into()?;
@@ -430,7 +436,7 @@ extern "C" fn new_confirm_action(n_args: usize, args: *const Obj, kwargs: *mut M
         if hold && hold_danger {
             page = page.with_confirm_style(theme::button_danger())
         }
-        let obj = LayoutObj::new(Frame::left_aligned(title, page))?;
+        let obj = LayoutObj::new(GetAddressFlow::new()?)?;
         Ok(obj.into())
     };
     unsafe { util::try_with_args_and_kwargs(n_args, args, kwargs, block) }

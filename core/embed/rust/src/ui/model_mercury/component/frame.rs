@@ -12,6 +12,7 @@ use crate::ui::{
 const TITLE_HEIGHT: i16 = 42;
 const TITLE_SPACE: i16 = 2;
 
+#[derive(Clone)]
 pub struct Frame<T, U> {
     border: Insets,
     title: Child<Label<U>>,
@@ -107,10 +108,10 @@ where
 
     pub fn update_content<F, R>(&mut self, ctx: &mut EventCtx, update_fn: F) -> R
     where
-        F: Fn(&mut T) -> R,
+        F: Fn(&mut EventCtx, &mut T) -> R,
     {
         self.content.mutate(ctx, |ctx, c| {
-            let res = update_fn(c);
+            let res = update_fn(ctx, c);
             c.request_complete_repaint(ctx);
             res
         })

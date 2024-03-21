@@ -577,6 +577,7 @@ impl<T> Button<T> {
     }
 }
 
+#[derive(Clone, Copy)]
 pub enum CancelConfirmMsg {
     Cancelled,
     Confirmed,
