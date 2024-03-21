@@ -176,89 +176,60 @@ secbool __wur flash_area_write_data_padded(const flash_area_t *area,
   if (data_size > total_size) {
     return secfalse;
   }
-  if (total_size > flash_area_get_size(area)) {
+  if (offset + total_size > flash_area_get_size(area)) {
     return secfalse;
   }
 
   const uint32_t *data32 = (const uint32_t *)data;
 
-  while (!flash_burst_aligned(offset) && data_size >= FLASH_BLOCK_SIZE) {
-    if (flash_area_write_block(area, offset, data32) != sectrue) {
-      return secfalse;
-    }
-    offset += FLASH_BLOCK_SIZE;
-    data32 += FLASH_BLOCK_WORDS;
-    total_size -= FLASH_BLOCK_SIZE;
-    data_size -= FLASH_BLOCK_SIZE;
-  }
-
+  while (total_size > 0) {
 #ifdef FLASH_BURST_SIZE
-  while (data_size >= FLASH_BURST_SIZE) {
-    if (flash_area_write_burst(area, offset, data32) != sectrue) {
-      return secfalse;
-    }
-    offset += FLASH_BURST_SIZE;
-    data32 += FLASH_BURST_WORDS;
-    total_size -= FLASH_BURST_SIZE;
-    data_size -= FLASH_BURST_SIZE;
-  }
+    if (flash_burst_aligned(offset) &&
+        (offset + FLASH_BURST_SIZE) <= total_size) {
+      if (data_size >= FLASH_BURST_SIZE) {
+        if (flash_area_write_burst(area, offset, data32) != sectrue) {
+          return secfalse;
+        }
+        data_size -= FLASH_BURST_SIZE;
+        data32 += FLASH_BURST_WORDS;
+      } else {
+        uint32_t burst[FLASH_BURST_WORDS];
+        memset(burst, padding, sizeof(burst));
+        if (data_size > 0) {
+          memcpy(burst, data32, data_size);
+          data_size = 0;
+        }
+        if (flash_area_write_burst(area, offset, burst) != sectrue) {
+          return secfalse;
+        }
+      }
+      offset += FLASH_BURST_SIZE;
+      total_size -= FLASH_BURST_SIZE;
+    } else
 #endif
-
-  while (!flash_burst_aligned(offset) && total_size >= FLASH_BLOCK_SIZE) {
-    uint32_t data_qw[FLASH_BLOCK_WORDS];
-    memset(data_qw, padding, FLASH_BLOCK_SIZE);
-
-    if (data_size > 0) {
-      uint32_t to_copy =
-          data_size > FLASH_BLOCK_SIZE ? FLASH_BLOCK_SIZE : data_size;
-      memcpy(data_qw, data32, to_copy);
-      data_size -= to_copy;
+    {
+      if (data_size >= FLASH_BLOCK_SIZE) {
+        if (flash_area_write_block(area, offset, data32) != sectrue) {
+          return secfalse;
+        }
+        data_size -= FLASH_BLOCK_SIZE;
+        data32 += FLASH_BLOCK_WORDS;
+      } else {
+        uint32_t block[FLASH_BLOCK_WORDS];
+        memset(block, padding, sizeof(block));
+        if (data_size > 0) {
+          memcpy(block, data32, data_size);
+          data_size = 0;
+        }
+        if (flash_area_write_block(area, offset, block) != sectrue) {
+          return secfalse;
+        }
+      }
+      offset += FLASH_BLOCK_SIZE;
+      total_size -= FLASH_BLOCK_SIZE;
     }
-
-    if (flash_area_write_block(area, offset, data_qw) != sectrue) {
-      return secfalse;
-    }
-    offset += FLASH_BLOCK_SIZE;
-    data32 += FLASH_BLOCK_WORDS;
-    total_size -= FLASH_BLOCK_SIZE;
   }
 
-#ifdef FLASH_BURST_SIZE
-  while (total_size >= FLASH_BURST_SIZE) {
-    uint32_t data_burst[FLASH_BURST_WORDS];
-    memset(data_burst, padding, FLASH_BURST_SIZE);
-
-    if (data_size > 0) {
-      memcpy(data_burst, data32, data_size);
-      data_size = 0;
-    }
-
-    if (flash_area_write_burst(area, offset, data_burst) != sectrue) {
-      return secfalse;
-    }
-    offset += FLASH_BURST_SIZE;
-    total_size -= FLASH_BURST_SIZE;
-  }
-#endif
-
-  while (total_size >= FLASH_BLOCK_SIZE) {
-    uint32_t data_qw[FLASH_BLOCK_WORDS];
-    memset(data_qw, padding, FLASH_BLOCK_SIZE);
-
-    if (data_size > 0) {
-      uint32_t to_copy =
-          data_size > FLASH_BLOCK_SIZE ? FLASH_BLOCK_SIZE : data_size;
-      memcpy(data_qw, data32, to_copy);
-      data_size -= to_copy;
-    }
-
-    if (flash_area_write_block(area, offset, data_qw) != sectrue) {
-      return secfalse;
-    }
-    offset += FLASH_BLOCK_SIZE;
-    data32 += FLASH_BLOCK_WORDS;
-    total_size -= FLASH_BLOCK_SIZE;
-  }
   return sectrue;
 }
 

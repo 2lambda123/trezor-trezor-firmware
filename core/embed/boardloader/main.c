@@ -227,8 +227,8 @@ static secbool copy_sdcard(void) {
   // copy bootloader from SD card to Flash
   term_printf("copying new bootloader from SD card\n\n");
 
-  ensure(flash_area_write_data(&BOOTLOADER_AREA, codelen, sdcard_buf,
-                               SDCARD_BLOCK_SIZE),
+  ensure(flash_area_write_data(&BOOTLOADER_AREA, 0, sdcard_buf,
+                               IMAGE_HEADER_SIZE + codelen),
          NULL);
 
   ensure(flash_lock_write(), NULL);

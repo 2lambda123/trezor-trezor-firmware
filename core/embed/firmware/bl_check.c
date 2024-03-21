@@ -226,7 +226,7 @@ void check_and_replace_bootloader(void) {
     decomp.dest = (uint8_t *)decomp_out;
   } while (uzlib_uncompress(&decomp) >= 0);
 
-  if (bl_len - offset > 0) {
+  if (offset < bl_len) {
     // fill the rest of the bootloader area with 0x00
     ensure(flash_area_write_data_padded(&BOOTLOADER_AREA, offset, NULL, 0, 0,
                                         bl_len - offset),
