@@ -60,9 +60,11 @@ i2c_instance_t i2c_defs[I2C_COUNT] = {
  * Using calculation from STM32CubeMX
  * PCLKx as source, assumed 160MHz
  * Fast mode, freq = 400kHz, Rise time = 250ns, Fall time = 100ns
+ * Fast mode, freq = 200kHz, Rise time = 250ns, Fall time = 100ns
+ * SCLH and SCLL are manually modified to achieve more symmetric clock
  */
-#define I2C_TIMING_400000_Hz 0x30D2153A
-#define I2C_TIMING_200000_Hz 0x30D2159E
+#define I2C_TIMING_400000_Hz 0x30D22728
+#define I2C_TIMING_200000_Hz 0x30D2595A
 #define I2C_TIMING I2C_TIMING_200000_Hz
 
 void i2c_init_instance(uint16_t idx, i2c_instance_t *instance) {
