@@ -20,11 +20,11 @@ def process_line(infile: TextIO, outfile: BinaryIO) -> None:
 
 def header_to_toif(path: str | Path) -> str:
     with open(path, "r") as infile, open('tmp.toif', "wb") as outfile:
-        infile.readline()
-        name_line = infile.readline()
+        infile.readline(5_000_000)
+        name_line = infile.readline(5_000_000)
         name = name_line.split(" ")[3].split("[")[0]
-        infile.readline()
-        magic_line = infile.readline().split(',')[3]
+        infile.readline(5_000_000)
+        magic_line = infile.readline(5_000_000).split(',')[3]
 
         outfile.write(bytes((0x54,)))
         outfile.write(bytes((0x4f,)))
@@ -41,13 +41,13 @@ def header_to_toif(path: str | Path) -> str:
             print(magic_line)
             raise Exception("Unknown format")
 
-        infile.readline()
+        infile.readline(5_000_000)
         process_line(infile, outfile)
-        infile.readline()
+        infile.readline(5_000_000)
         process_line(infile, outfile)
-        infile.readline()
+        infile.readline(5_000_000)
         process_line(infile, outfile)
-        infile.readline()
+        infile.readline(5_000_000)
     return name
 
 
