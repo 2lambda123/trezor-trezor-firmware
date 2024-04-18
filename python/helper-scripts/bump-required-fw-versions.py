@@ -41,7 +41,7 @@ def fetch_releases(model: str) -> List[dict]:
         version = "2"
 
     url = RELEASES_URL.format(version)
-    releases = requests.get(url).json()
+    releases = requests.get(url, timeout=60).json()
     releases.sort(key=lambda r: r["version"], reverse=True)
     return releases
 

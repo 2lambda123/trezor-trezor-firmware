@@ -33,7 +33,7 @@ MAX_KB_ADDITION_TO_SUCCEED = 5
 
 def download_and_get_latest_master_firmware_elf() -> Path:
     url = "https://gitlab.com/satoshilabs/trezor/trezor-firmware/-/jobs/artifacts/main/download?job=core%20fw%20regular%20build"
-    req = requests.get(url)
+    req = requests.get(url, timeout=60)
     tmp_dir = HERE / "tmp_for_master_elf"
     zip_file = ZipFile(BytesIO(req.content))
     zip_file.extractall(tmp_dir)

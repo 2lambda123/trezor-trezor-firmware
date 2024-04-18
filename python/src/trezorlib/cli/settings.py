@@ -233,7 +233,7 @@ def language(
             language_data = Path(path_or_url).read_bytes()
         except Exception:
             try:
-                language_data = requests.get(path_or_url).content
+                language_data = requests.get(path_or_url, timeout=60).content
             except Exception:
                 raise click.ClickException(
                     f"Failed to load translations from {path_or_url}"

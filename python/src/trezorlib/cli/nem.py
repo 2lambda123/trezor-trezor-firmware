@@ -76,6 +76,6 @@ def sign_tx(
     payload = {"data": transaction.data.hex(), "signature": transaction.signature.hex()}
 
     if broadcast:
-        return requests.post(f"{broadcast}/transaction/announce", json=payload).json()
+        return requests.post(f"{broadcast}/transaction/announce", json=payload, timeout=60).json()
     else:
         return payload

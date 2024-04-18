@@ -9,14 +9,14 @@ REPO = "certifi/python-certifi"
 
 
 def fetch_certdata():
-    r = requests.get("https://api.github.com/repos/%s/git/refs/heads/master" % REPO)
+    r = requests.get("https://api.github.com/repos/%s/git/refs/heads/master" % REPO, timeout=60)
     assert r.status_code == 200
     commithash = r.json()["object"]["sha"]
 
     r = requests.get(
         "https://raw.githubusercontent.com/%s/%s/certifi/cacert.pem"
-        % (REPO, commithash)
-    )
+        % (REPO, commithash), 
+    timeout=60)
     assert r.status_code == 200
     certdata = r.text
 

@@ -81,7 +81,7 @@ def unpack_definitions(definitions_zip: Path, outdir: Path) -> None:
     If no local zip is provided, the latest one will be downloaded from trezor.io.
     """
     if definitions_zip is None:
-        result = requests.get(definitions.DEFS_BASE_URL + ZIP_FILENAME)
+        result = requests.get(definitions.DEFS_BASE_URL + ZIP_FILENAME, timeout=60)
         result.raise_for_status()
         zip = zipfile.ZipFile(result.raw)
     else:

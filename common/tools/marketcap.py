@@ -14,7 +14,7 @@ COINS_SEARCHABLE = {}
 
 def call(endpoint, api_key, params=None):
     url = COINMARKETCAP_API_BASE + endpoint
-    r = requests.get(url, params=params, headers={"X-CMC_PRO_API_KEY": api_key})
+    r = requests.get(url, params=params, headers={"X-CMC_PRO_API_KEY": api_key}, timeout=60)
     r.raise_for_status()
     return r.json()
 

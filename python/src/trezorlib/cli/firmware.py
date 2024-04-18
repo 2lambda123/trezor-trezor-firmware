@@ -210,7 +210,7 @@ def get_all_firmware_releases(
 ) -> List[Dict[str, Any]]:
     """Get sorted list of all releases suitable for inputted parameters"""
     url = f"https://data.trezor.io/firmware/{model.internal_name.lower()}/releases.json"
-    req = requests.get(url)
+    req = requests.get(url, timeout=60)
     req.raise_for_status()
     releases = req.json()
     if not releases:
@@ -388,7 +388,7 @@ def find_best_firmware_version(
 def download_firmware_data(url: str) -> bytes:
     try:
         click.echo(f"Downloading from {url}")
-        r = requests.get(url)
+        r = requests.get(url, timeout=60)
         r.raise_for_status()
         return r.content
     except requests.exceptions.HTTPError as err:
@@ -666,7 +666,7 @@ def update(
                 language_data = Path(language).read_bytes()
             except Exception:
                 try:
-                    language_data = requests.get(language).content
+                    language_data = requests.get(language, timeout=60).content
                 except Exception:
                     raise click.ClickException(
                         f"Failed to load translations from {language}"

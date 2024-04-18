@@ -37,7 +37,7 @@ VENDOR_HEADER = (
 def _fetch(url: str, version: str) -> bytes:
     path = HERE / f"trezor-{version}.bin"
     if not path.exists():
-        r = requests.get(url)
+        r = requests.get(url, timeout=60)
         r.raise_for_status()
         path.write_bytes(r.content)
     return path.read_bytes()

@@ -89,7 +89,7 @@ OUTPUTS = [
 def get_tx_info(tx_id: str) -> messages.TransactionType:
     """Fetch basic transaction info for the signing."""
     tx_url = f"{URL}/{tx_id}"
-    tx_src = requests.get(tx_url, headers={"user-agent": "tx_cache"}).json(
+    tx_src = requests.get(tx_url, headers={"user-agent": "tx_cache"}, timeout=60).json(
         parse_float=Decimal
     )
     if "error" in tx_src:

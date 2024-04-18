@@ -123,7 +123,7 @@ class UrlSource(Source):
     def fetch_path(self, *components: str) -> t.Optional[bytes]:
         url = self.base_url + "/".join(components)
         LOG.info("Downloading definition from %s", url)
-        r = requests.get(url)
+        r = requests.get(url, timeout=60)
         if r.status_code == 404:
             LOG.info("Requested definition at %s was not found", url)
             return None
