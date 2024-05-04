@@ -55,6 +55,7 @@ from typing_extensions import (  # for python37 support, is not present in typin
 )
 
 import click
+from security import safe_command
 
 if TYPE_CHECKING:
     LineIgnores = List["LineIgnore"]
@@ -288,7 +289,7 @@ class PyrightTool:
             )
 
             # run pyright with generated config
-            result = subprocess.run(cmd, stdout=subprocess.PIPE, text=True)
+            result = safe_command.run(subprocess.run, cmd, stdout=subprocess.PIPE, text=True)
 
         # Checking if there was no non-type-checking error when running the above command
         # Exit code 0 = all fine, no type-checking issues in pyright

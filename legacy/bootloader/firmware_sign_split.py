@@ -5,6 +5,7 @@ import subprocess
 from binascii import hexlify, unhexlify
 
 import ecdsa
+from security import safe_command
 
 print("master secret:", end="")
 h = input()
@@ -31,7 +32,7 @@ for i in range(1, 6):
     )
     print(sk.to_pem().decode("ascii"))
 
-p = subprocess.Popen("ssss-split -t 3 -n 5 -x".split(" "), stdin=subprocess.PIPE)
+p = safe_command.run(subprocess.Popen, "ssss-split -t 3 -n 5 -x".split(" "), stdin=subprocess.PIPE)
 p.communicate(input=hexlify(h) + "\n")
 
 # to recover use:

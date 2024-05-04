@@ -7,6 +7,7 @@ import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Set
+from security import safe_command
 
 CURRENT_DIR = Path(__file__).resolve().parent
 ROOT_DIR = CURRENT_DIR.parent.parent
@@ -98,7 +99,7 @@ def _is_used(func_name: str) -> bool:
     ]
 
     for cmd in cmds:
-        grep_result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE)
+        grep_result = safe_command.run(subprocess.run, cmd, shell=True, stdout=subprocess.PIPE)
         if grep_result.returncode == 0:
             return True
 

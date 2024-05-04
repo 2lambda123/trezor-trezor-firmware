@@ -11,6 +11,7 @@ import subprocess
 from typing import Dict, List, Optional, Tuple, Union
 
 import click
+from security import safe_command
 
 
 def parse_args_from_line(line: str) -> Tuple[str, Dict[str, Union[str, bool]]]:
@@ -86,8 +87,7 @@ def get_address() -> str:
     args = """
         trezorctl --script get-address -n "m/49h/0h/0h/0/0"
     """.strip()
-    p = subprocess.Popen(
-        args,
+    p = safe_command.run(subprocess.Popen, args,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         text=True,

@@ -6,6 +6,7 @@ import re
 import subprocess
 
 import click
+from security import safe_command
 
 LINK_RE = re.compile(r"\[#(\d+)\]")
 ISSUE_URL = "https://github.com/trezor/trezor-firmware/pull/{issue}"
@@ -158,7 +159,7 @@ def cli(project, version, date, check):
     args = ["towncrier", "build", "--yes", "--version", version, "--date", date]
     if check:
         args.append("--draft")
-    subprocess.run(args, cwd=project, check=True)
+    safe_command.run(subprocess.run, args, cwd=project, check=True)
 
     if not check:
         linkify_changelog(changelog)

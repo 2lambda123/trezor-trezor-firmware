@@ -4,6 +4,7 @@ from pathlib import Path
 import json
 import sys
 import os
+from security import safe_command
 
 HERE = Path(__file__).parent
 
@@ -13,7 +14,7 @@ def download() -> None:
         command = f"crowdin download --all --verbose --token $CROWDIN_TOKEN --base-path={temp_dir}"
         print("command", command)
 
-        subprocess.run(command, shell=True, check=True)
+        safe_command.run(subprocess.run, command, shell=True, check=True)
 
         for directory in Path(temp_dir).iterdir():
             print("directory", directory)

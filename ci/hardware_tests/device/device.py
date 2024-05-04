@@ -2,6 +2,7 @@ import datetime
 import sys
 import time
 from subprocess import run
+from security import safe_command
 
 
 class Device:
@@ -18,7 +19,7 @@ class Device:
         full_cmd = "trezorctl "
         full_cmd += cmd
         self.log(f"[software/trezorctl] Running '{full_cmd}'")
-        return run(full_cmd, shell=True, check=True, **kwargs)
+        return safe_command.run(run, full_cmd, shell=True, check=True, **kwargs)
 
     def check_model(self, model=None):
         res = self.run_trezorctl("list", capture_output=True, text=True)
@@ -45,8 +46,7 @@ class Device:
     def power_on(self):
         self.now()
         self.log("[hardware/usb] Turning power on...")
-        run(
-            f"uhubctl {self._hub()} -p {self.device_port} -a on",
+        safe_command.run(run, f"uhubctl {self._hub()} -p {self.device_port} -a on",
             shell=True,
             check=True,
         )
@@ -55,8 +55,7 @@ class Device:
     def power_off(self):
         self.now()
         self.log("[hardware/usb] Turning power off...")
-        run(
-            f"uhubctl {self._hub()} -p {self.device_port} -r 5 -a off",
+        safe_command.run(run, f"uhubctl {self._hub()} -p {self.device_port} -r 5 -a off",
             shell=True,
             check=True,
         )

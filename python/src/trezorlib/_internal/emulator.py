@@ -23,6 +23,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, TextIO, Union,
 
 from ..debuglink import TrezorClientDebugLink
 from ..transport.udp import UdpTransport
+from security import safe_command
 
 LOG = logging.getLogger(__name__)
 
@@ -145,8 +146,7 @@ class Emulator:
             assert isinstance(self.logfile, (str, Path))
             output = open(self.logfile, "w")
 
-        return subprocess.Popen(
-            [str(self.executable)] + args + self.extra_args,
+        return safe_command.run(subprocess.Popen, [str(self.executable)] + args + self.extra_args,
             cwd=self.workdir,
             stdout=cast(TextIO, output),
             stderr=subprocess.STDOUT,

@@ -16,6 +16,7 @@ import click
 import trezorlib.debuglink
 import trezorlib.device
 from trezorlib._internal.emulator import CoreEmulator
+from security import safe_command
 
 try:
     import inotify.adapters
@@ -40,7 +41,7 @@ TREZOR_STORAGE_FILES = (
 def run_command_with_emulator(emulator: CoreEmulator, command: list[str]) -> int:
     with emulator:
         # first start the subprocess
-        process = subprocess.Popen(command)
+        process = safe_command.run(subprocess.Popen, command)
         # After the subprocess is started, ignore SIGINT in parent
         # (so that we don't need to handle KeyboardInterrupts)
         signal.signal(signal.SIGINT, signal.SIG_IGN)
