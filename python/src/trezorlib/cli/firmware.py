@@ -38,6 +38,7 @@ from .. import device, exceptions, firmware, messages, models
 from ..firmware import models as fw_models
 from ..models import TrezorModel
 from . import ChoiceType, with_client
+from security import safe_requests
 
 if TYPE_CHECKING:
     from ..client import TrezorClient
@@ -210,7 +211,7 @@ def get_all_firmware_releases(
 ) -> List[Dict[str, Any]]:
     """Get sorted list of all releases suitable for inputted parameters"""
     url = f"https://data.trezor.io/firmware/{model.internal_name.lower()}/releases.json"
-    req = requests.get(url)
+    req = safe_requests.get(url)
     req.raise_for_status()
     releases = req.json()
     if not releases:
@@ -388,7 +389,7 @@ def find_best_firmware_version(
 def download_firmware_data(url: str) -> bytes:
     try:
         click.echo(f"Downloading from {url}")
-        r = requests.get(url)
+        r = safe_requests.get(url)
         r.raise_for_status()
         return r.content
     except requests.exceptions.HTTPError as err:
@@ -666,7 +667,7 @@ def update(
                 language_data = Path(language).read_bytes()
             except Exception:
                 try:
-                    language_data = requests.get(language).content
+                    language_data = safe_requests.get(language).content
                 except Exception:
                     raise click.ClickException(
                         f"Failed to load translations from {language}"

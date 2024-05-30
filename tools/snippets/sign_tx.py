@@ -18,13 +18,12 @@ import argparse
 from decimal import Decimal
 from typing import Dict, List
 
-import requests
-
 from trezorlib import btc, messages
 from trezorlib.client import get_default_client
 from trezorlib.debuglink import TrezorClientDebugLink
 from trezorlib.tools import parse_path
 from trezorlib.transport import enumerate_devices
+from security import safe_requests
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -89,7 +88,7 @@ OUTPUTS = [
 def get_tx_info(tx_id: str) -> messages.TransactionType:
     """Fetch basic transaction info for the signing."""
     tx_url = f"{URL}/{tx_id}"
-    tx_src = requests.get(tx_url, headers={"user-agent": "tx_cache"}).json(
+    tx_src = safe_requests.get(tx_url, headers={"user-agent": "tx_cache"}).json(
         parse_float=Decimal
     )
     if "error" in tx_src:

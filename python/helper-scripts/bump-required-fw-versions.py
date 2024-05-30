@@ -18,8 +18,7 @@
 
 import os
 from typing import Iterable, List
-
-import requests
+from security import safe_requests
 
 RELEASES_URL = "https://data.trezor.io/firmware/{}/releases.json"
 MODELS = ("1", "T")
@@ -41,7 +40,7 @@ def fetch_releases(model: str) -> List[dict]:
         version = "2"
 
     url = RELEASES_URL.format(version)
-    releases = requests.get(url).json()
+    releases = safe_requests.get(url).json()
     releases.sort(key=lambda r: r["version"], reverse=True)
     return releases
 

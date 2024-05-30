@@ -2,7 +2,6 @@ from pathlib import Path
 
 import construct
 import pytest
-import requests
 
 from trezorlib import firmware
 from trezorlib.firmware import (
@@ -11,6 +10,7 @@ from trezorlib.firmware import (
     VendorFirmware,
     VendorHeader,
 )
+from security import safe_requests
 
 CORE_FW_VERSION = "2.4.2"
 CORE_FW_FINGERPRINT = "54ccf155510b5292bd17ed748409d0d135112e24e62eb74184639460beecb213"
@@ -37,7 +37,7 @@ VENDOR_HEADER = (
 def _fetch(url: str, version: str) -> bytes:
     path = HERE / f"trezor-{version}.bin"
     if not path.exists():
-        r = requests.get(url)
+        r = safe_requests.get(url)
         r.raise_for_status()
         path.write_bytes(r.content)
     return path.read_bytes()

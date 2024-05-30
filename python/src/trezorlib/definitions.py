@@ -4,12 +4,12 @@ import typing as t
 from pathlib import Path
 
 import construct as c
-import requests
 from construct_classes import Struct, subcon
 
 from . import cosi, merkle_tree
 from .messages import EthereumDefinitionType
 from .tools import EnumAdapter
+from security import safe_requests
 
 LOG = logging.getLogger(__name__)
 
@@ -123,7 +123,7 @@ class UrlSource(Source):
     def fetch_path(self, *components: str) -> t.Optional[bytes]:
         url = self.base_url + "/".join(components)
         LOG.info("Downloading definition from %s", url)
-        r = requests.get(url)
+        r = safe_requests.get(url)
         if r.status_code == 404:
             LOG.info("Requested definition at %s was not found", url)
             return None

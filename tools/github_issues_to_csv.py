@@ -5,8 +5,8 @@ Currently writes all issues that have some Weight.
 """
 import argparse
 import csv
-import requests
 import os.path
+from security import safe_requests
 
 token = None
 
@@ -76,7 +76,7 @@ def get_issues(name):
         headers = {"Authorization": "token " + token}
     else:
         headers = None
-    r = requests.get(url, headers=headers)
+    r = safe_requests.get(url, headers=headers)
 
     csvfilename = f"{name.replace('/', '-')}-issues.csv"
     with open(csvfilename, "w", newline="") as csvfile:
@@ -112,7 +112,7 @@ def get_issues(name):
                         link.split(";") for link in r.headers["link"].split(",")
                     )
                 }
-                r = requests.get(pages["next"], headers=headers)
+                r = safe_requests.get(pages["next"], headers=headers)
                 write_issues(r, csvout)
                 if pages["next"] == pages["last"]:
                     break

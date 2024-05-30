@@ -18,11 +18,11 @@
 from __future__ import annotations
 
 import click
-import requests
 import zipfile
 from pathlib import Path
 
 from trezorlib import definitions, merkle_tree
+from security import safe_requests
 
 ZIP_FILENAME = "definitions-sparse.zip"
 
@@ -81,7 +81,7 @@ def unpack_definitions(definitions_zip: Path, outdir: Path) -> None:
     If no local zip is provided, the latest one will be downloaded from trezor.io.
     """
     if definitions_zip is None:
-        result = requests.get(definitions.DEFS_BASE_URL + ZIP_FILENAME)
+        result = safe_requests.get(definitions.DEFS_BASE_URL + ZIP_FILENAME)
         result.raise_for_status()
         zip = zipfile.ZipFile(result.raw)
     else:

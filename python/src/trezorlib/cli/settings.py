@@ -21,10 +21,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Optional, cast
 
 import click
-import requests
 
 from .. import device, messages, toif
 from . import AliasedGroup, ChoiceType, with_client
+from security import safe_requests
 
 if TYPE_CHECKING:
     from ..client import TrezorClient
@@ -233,7 +233,7 @@ def language(
             language_data = Path(path_or_url).read_bytes()
         except Exception:
             try:
-                language_data = requests.get(path_or_url).content
+                language_data = safe_requests.get(path_or_url).content
             except Exception:
                 raise click.ClickException(
                     f"Failed to load translations from {path_or_url}"

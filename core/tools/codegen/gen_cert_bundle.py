@@ -2,19 +2,18 @@
 
 from base64 import b64decode
 from hashlib import sha256
-import requests
+from security import safe_requests
 
 
 REPO = "certifi/python-certifi"
 
 
 def fetch_certdata():
-    r = requests.get("https://api.github.com/repos/%s/git/refs/heads/master" % REPO)
+    r = safe_requests.get("https://api.github.com/repos/%s/git/refs/heads/master" % REPO)
     assert r.status_code == 200
     commithash = r.json()["object"]["sha"]
 
-    r = requests.get(
-        "https://raw.githubusercontent.com/%s/%s/certifi/cacert.pem"
+    r = safe_requests.get("https://raw.githubusercontent.com/%s/%s/certifi/cacert.pem"
         % (REPO, commithash)
     )
     assert r.status_code == 200
