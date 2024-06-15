@@ -57,7 +57,7 @@ def main():
 
     certs = process_certdata(certdata)
 
-    size = sum([len(x) for x in certs.values()])
+    size = sum(len(x) for x in certs.values())
     print(
         "# certs: %d | digests size: %d | total size: %d"
         % (len(certs), len(certs) * 32, size)

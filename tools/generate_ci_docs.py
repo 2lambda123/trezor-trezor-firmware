@@ -137,8 +137,7 @@ class DocsGenerator:
                 else:
                     # regex: first character of a line is a word-character or a dot
                     if re.search(r"\A[\w\.]", line) and not any(
-                        [line.startswith(not_job) for not_job in self.NOT_JOBS]
-                    ):
+                        line.startswith(not_job) for not_job in self.NOT_JOBS):
                         job_name = line.rstrip(":\n")
                         all_jobs[job_name] = {
                             "description": comment_buffer,
