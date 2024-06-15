@@ -33,14 +33,14 @@ def extract_strings(file_path: Path) -> list[str]:
                 if line.startswith("}"):
                     is_paused = False
                 continue
-            if any([line.strip().startswith(start) for start in line_starts_break]):
+            if any(line.strip().startswith(start) for start in line_starts_break):
                 break
-            if any([line.strip().startswith(start) for start in line_starts_pause]):
+            if any(line.strip().startswith(start) for start in line_starts_pause):
                 is_paused = True
                 continue
-            if any([line.strip().startswith(start) for start in line_starts_continue]):
+            if any(line.strip().startswith(start) for start in line_starts_continue):
                 continue
-            if any([substr in line for substr in in_line_continue]):
+            if any(substr in line for substr in in_line_continue):
                 continue
             if "//" in line:
                 line = line[: line.index("//")]
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     for file_path in all_rust_files:
         if file_path.name in IGNORE_FILES:
             continue
-        if any([ignore_dir in str(file_path) for ignore_dir in IGNORE_DIRS]):
+        if any(ignore_dir in str(file_path) for ignore_dir in IGNORE_DIRS):
             continue
         strings = extract_strings(file_path)
         strings = list(set(strings))

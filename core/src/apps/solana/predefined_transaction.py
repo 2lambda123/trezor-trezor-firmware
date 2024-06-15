@@ -149,11 +149,8 @@ async def try_confirm_token_transfer_transaction(
     )
 
     total_token_amount = sum(
-        [
-            transfer_token_instruction.amount
-            for transfer_token_instruction in transfer_token_instructions
-        ]
-    )
+        transfer_token_instruction.amount
+            for transfer_token_instruction in transfer_token_instructions)
 
     await confirm_token_transfer(
         token_account if base_address is None else base_address,
